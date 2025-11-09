@@ -22,3 +22,16 @@ def int_as_byte(number: int, byteorder="big"):
     if number == 0:
         return b"\x00"
     return number.to_bytes(int(math.log(number, 8)) + 1, byteorder)
+
+
+class Repository:
+    def __init__(self, name=None):
+        self.name = name
+
+
+class Schema:
+    def __init__(self, *repos_iter, **repos_d: dict[str | Repository]):
+        for key, value in repos_d.items():
+            value.name = key
+        self.repos = repos_d
+
