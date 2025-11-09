@@ -103,3 +103,86 @@ class DatabaseManager:
             self.__db_file.write(CONTEXT_REPO_DATA)
         self.__db_file.flush()
 
+    def read(self, repo_id):
+        to_return = []
+        self.__db_file.seek(0)
+        awaiting_context = False
+        contexts = []
+        parsing = []
+        is_repo_target = True
+
+        local_return_idx = {}
+        data_block_idx = None
+
+        while (read_bytes := self.__db_file.read(1)) != b"":
+            if awaiting_context:
+                if read_bytes == CONTEXT_REPO_DATA[1:2]:
+                    if len(contexts) == 0 or contexts[-1] != CONTEXT_REPO_DATA:
+                        contexts.append(CONTEXT_REPO_DATA)
+                    else:
+                        del contexts[-1]
+                elif read_bytes == CONTEXT_REPO_OWNER_DEF[1:2]:
+                    if len(contexts) == 0 or contexts[-1] != CONTEXT_REPO_OWNER_DEF:
+                        contexts.append(CONTEXT_REPO_OWNER_DEF)
+                    else:
+                        if parsing[:-1] == repo_id:
+                            is_repo_target = True
+                        else:
+                            is_repo_target = False
+                        parsing.clear()
+                        del contexts[-1]
+                elif read_bytes == CONTEXT_IDX_REPO_DATA[1:2]:
+                    if len(contexts) == 0 or contexts[-1] != CONTEXT_IDX_REPO_DATA:
+                        contexts.append(CONTEXT_IDX_REPO_DATA)
+                    else:
+                        register_idx = int(b"".join(parsing[:-1]).hex(), 16)
+                        if not register_idx in local_return_idx.keys():
+                            local_return_idx[register_idx] = len(to_return)
+                            to_return.append({})
+                        parsing.clear()
+                        del contexts[-1]
+                elif read_bytes == CONTEXT_KEY_DEF[1:2]:
+                    if len(contexts) == 0 or contexts[-1] != CONTEXT_KEY_DEF:
+                        contexts.append(CONTEXT_KEY_DEF)
+                    else:
+                        current_key = b"".join(parsing[:-1])
+                        current_dict = to_return[local_return_idx[register_idx]]
+                        if not current_key in current_dict:
+                            current_dict[current_key] = []
+                        parsing.clear()
+                        del contexts[-1]
+                elif read_bytes == CONTEXT_IDX_DEF[1:2]:
+                    if len(contexts) == 0 or contexts[-1] != CONTEXT_IDX_DEF:
+                        contexts.append(CONTEXT_IDX_DEF)
+                    else:
+                        data_block_idx = int(b"".join(parsing[:-1]).hex(), 16)
+                        parsing.clear()
+                        print(data_block_idx)
+                        del contexts[-1]
+                elif read_bytes == CONTEXT_BLOCK_DATA[1:2]:
+                    if len(contexts) == 0 or contexts[-1] != CONTEXT_BLOCK_DATA:
+                        contexts.append(CONTEXT_BLOCK_DATA)
+                    else:
+                        current_dict = to_return[local_return_idx[register_idx]][
+                            current_key
+                        ].append(b"".join(parsing[1:-1]))
+                        parsing.clear()
+                        del contexts[-1]
+            if len(contexts) > 0:
+                if not awaiting_context:
+                    if contexts[-1] in (
+                        CONTEXT_REPO_OWNER_DEF,
+                        CONTEXT_IDX_REPO_DATA,
+                        CONTEXT_KEY_DEF,
+                        CONTEXT_IDX_DEF,
+                        CONTEXT_BLOCK_DATA,
+                    ):
+                        parsing.append(read_bytes)
+
+            if read_bytes == CONTEXT_JOKER and not awaiting_context:
+                awaiting_context = True
+            else:
+                awaiting_context = False
+
+        return to_return
+
