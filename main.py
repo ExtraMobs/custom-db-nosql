@@ -50,3 +50,22 @@ class DatabaseManager:
         self.__repo_id = {}
         self.__repo_obj = {}
 
+    def set_repo(self, repo: Repository):
+        self.__db_file.write(CONTEXT_REPO_DEF)
+
+        self.__db_file.write(CONTEXT_REPO_ID)
+        self.__last_repo_id += 1
+        self.__db_file.write(
+            repo_id := with_joker(int_as_byte(self.__last_repo_id))
+        )  # id
+        self.__db_file.write(CONTEXT_REPO_ID)
+
+        self.__db_file.write(CONTEXT_REPO_NAME)
+        self.__db_file.write(with_joker(bytes(repo.name, "utf-8")))  # db_name
+        self.__db_file.write(CONTEXT_REPO_NAME)
+
+        self.__db_file.write(CONTEXT_REPO_DEF)
+
+        self.__repo_id[bytes(repo.name, "utf-8")] = repo_id
+        self.__repo_obj[repo_id] = repo
+
