@@ -35,3 +35,18 @@ class Schema:
             value.name = key
         self.repos = repos_d
 
+
+class DatabaseManager:
+    def __init__(self, path: str):
+        path = os.path.abspath(path)
+        if not os.path.exists(path):
+            raise Exception("File not found.")
+
+        if not os.path.isfile(path):
+            raise Exception("Path is a folder.")
+
+        self.__db_file = open(path, "rb+")
+        self.__last_repo_id = 0
+        self.__repo_id = {}
+        self.__repo_obj = {}
+
