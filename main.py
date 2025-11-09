@@ -69,3 +69,5 @@ class DatabaseManager:
         self.__repo_id[bytes(repo.name, "utf-8")] = repo_id
         self.__repo_obj[repo_id] = repo
 
+    def get_repo_by_name(self, name) -> Repository:
+        return self.__repo_id[name]
