@@ -16,3 +16,9 @@ CONTEXT_IDX_REPO_DATA = CONTEXT_JOKER + b"\x09"
 def with_joker(data: bytes):
     j = CONTEXT_JOKER
     return data.replace(j, j + j)
+
+
+def int_as_byte(number: int, byteorder="big"):
+    if number == 0:
+        return b"\x00"
+    return number.to_bytes(int(math.log(number, 8)) + 1, byteorder)
