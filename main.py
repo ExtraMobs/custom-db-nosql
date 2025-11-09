@@ -186,3 +186,17 @@ class DatabaseManager:
 
         return to_return
 
+    @classmethod
+    def create(cls, path: str, schema: Schema):
+
+        if not schema.__class__ is Schema:
+            raise Exception(f"Invalid Schema: {schema}")
+
+        open(path, "x")
+        dbm = cls(path)
+
+        for repo in schema.repos.values():
+            dbm.set_repo(repo)
+
+        return dbm
+
