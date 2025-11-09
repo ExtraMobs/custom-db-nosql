@@ -71,3 +71,35 @@ class DatabaseManager:
 
     def get_repo_by_name(self, name) -> Repository:
         return self.__repo_id[name]
+
+    def insert_into(self, repo_id: bytes, data_to: list[dict]):
+        print(self.__db_file.seek(0, 2))
+        for data_item in data_to:
+            self.__db_file.write(CONTEXT_REPO_DATA)
+
+            self.__db_file.write(CONTEXT_REPO_OWNER_DEF)
+            self.__db_file.write(with_joker(repo_id))
+
+            self.__db_file.write(CONTEXT_IDX_REPO_DATA)
+            self.__db_file.write(with_joker(int_as_byte(int(time.time() * 1000))))
+            self.__db_file.write(CONTEXT_IDX_REPO_DATA)
+
+            self.__db_file.write(CONTEXT_REPO_OWNER_DEF)
+
+            for name, data in data_item.items():
+                self.__db_file.write(CONTEXT_KEY_DEF)
+                self.__db_file.write(name)
+                self.__db_file.write(CONTEXT_KEY_DEF)
+                for idx, item in enumerate(data):
+                    self.__db_file.write(CONTEXT_IDX_DEF)
+                    self.__db_file.write(with_joker(int_as_byte(idx)))
+                    self.__db_file.write(CONTEXT_IDX_DEF)
+
+                    self.__db_file.write(CONTEXT_BLOCK_DATA)
+                    self.__db_file.write(DATA_BLOCK_COMPLETE)
+                    self.__db_file.write(with_joker(item))
+                    self.__db_file.write(CONTEXT_BLOCK_DATA)
+
+            self.__db_file.write(CONTEXT_REPO_DATA)
+        self.__db_file.flush()
+
