@@ -11,3 +11,8 @@ CONTEXT_IDX_DEF = CONTEXT_JOKER + b"\x06"
 CONTEXT_REPO_OWNER_DEF = CONTEXT_JOKER + b"\x07"
 CONTEXT_REPO_DATA = CONTEXT_JOKER + b"\x08"
 CONTEXT_IDX_REPO_DATA = CONTEXT_JOKER + b"\x09"
+
+
+def with_joker(data: bytes):
+    j = CONTEXT_JOKER
+    return data.replace(j, j + j)
