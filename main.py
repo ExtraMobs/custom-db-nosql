@@ -207,3 +207,33 @@ class DatabaseManager:
 
         return dbm
 
+
+schema = Schema(test_repo=Repository())
+
+path = "./test.custom_db"
+
+# db = DatabaseManager.create(path, schema)
+# db.insert_into(
+#     db.get_repo_by_name(b"test_repo"), [{b"nomes": [bytes(i, 'utf-8') for i in pickle.load(open('string_list_dump', 'rb'))]}]
+# )
+
+db = DatabaseManager(path)
+pp(
+    [str(item, "utf-8") for item in db.read(b"\x01")[0][b"nomes"]]
+    == pickle.load(open("string_list_dump", "rb"))
+)
+# print()
+
+# 00 - Coringa dentro do contexto
+# 01 - Bloco de dados completo
+# 02 - Bloco de dados incompleto (Sabe que tem alterações mais a frente no arquivo)
+
+# 0001 - Contexto de definição do Repo
+# 0002 - Contexto de Id do Repo
+# 0003 - Contexto do Nome do Repo
+# 0004 - Contexto de bloco de dados
+# 0005 - Contexto de definição de chave
+# 0006 - Contexto de definição de índice
+# 0007 - Contexto de definição de repo dono
+# 0008 - Contexto de dados do repositório
+# 0009 - Contexte de índice da lista dentro do registro
