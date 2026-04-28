@@ -236,4 +236,4 @@ pp(
 # 0006 - Contexto de definição de índice
 # 0007 - Contexto de definição de repo dono
 # 0008 - Contexto de dados do repositório
-# 0009 - Contexte de índice da lista dentro do registro
+# 0009 - Contexto de índice da lista dentro do registro
